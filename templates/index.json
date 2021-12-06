@@ -1,5 +1,14 @@
 {
   "sections": {
+    "slideshow": {
+      "type": "slideshow",
+      "settings":{
+
+      },
+      "blocks": {
+
+      }
+    },
     "image_banner": {
       "type": "image-banner",
       "settings": {
@@ -96,6 +105,7 @@
     }
   },
   "order": [
+    "slideshow",
     "image_banner",
     "rich_text",
     "featured_products",
