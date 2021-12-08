@@ -1,3 +1,21 @@
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.article-card__image-wrapper {
+  margin: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  margin-bottom: 10px;
+  break-inside: avoid;
+}
+
+.article-card__image-wrapper > img {
+  grid-row: 1 / -1;
+  grid-column: 1;
+}
+
 .card {
   display: block;
   overflow: hidden;
