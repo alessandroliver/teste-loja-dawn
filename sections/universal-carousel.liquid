@@ -1,0 +1,255 @@
+ {{ 'universal-carousel.css' | asset_url | stylesheet_tag }}
+
+{%- liquid assign products_to_display = section.settings.collection.all_products_count
+if section.settings.collection.all_products_count > section.settings.products_count
+assign products_to_display = section.settings.products_count
+endif
+-%}
+
+<div data-carousel-id="carousel-{{section.id}}" class="carouselContainer">
+<div class="topWrapper">
+{% if section.settings.title != blank %} <h2>{{section.settings.title}}</h2>{% endif %}
+{% if section.settings.view_all == true and section.settings.type == 'product'%}
+<a href="{{ section.settings.collection.url }}" id="viewAllBtn">
+<span>View All</span>
+</a>
+{% endif %} </div>
+<div class="carouselWrapper
+{% case section.settings.slide_number %}
+{% when 2 %} two
+{% when 3 %} three
+{% when 4 %} four
+{% when 5 %} five
+{% when 6 %} six
+{% when 7 %} seven
+{% endcase %}">
+<ul class="carouselBox" id="carouselBox"
+data-slide="{{section.settings.slide_number}}"
+data-type="{{section.settings.type}}"
+data-autoplay="{{section.settings.autoplay}}"
+data-interval="{{section.settings.interval | times: 1000 }}"
+data-infinite-scroll="{{section.settings.infinite}}"
+data-counter-type="{{section.settings.counter_type}}">
+{% case section.settings.type %}
+{% when "product" %}
+{%- for product in section.settings.collection.products limit: section.settings.products_count-%}
+<li class="carouselSlider"
+
+id="slide-{% increment %}">
+{% assign product_image = product.selected_or_first_available_variant %}
+<a class="productBox" href="{{ product.url | within: collection }}" style="text-decoration: none;">
+<img class="carouselImage" src="{{ product.featured_image | img_url: 'master'}}"
+alt="{{ product.images.alt | escape }}"/>
+<div class="detailsText">
+<span class = "productTitle"> {{ product.title }}</span>
+<span class = "productPrice"> {{ product.price | money }}</span>
+</div>
+</a>
+</li>
+{% endfor %}
+{% when "card" %}
+{% if section.settings.slide_number > 5 %}
+{% assign section.settings.slide_number = 4 %}
+{% else %}
+{% assign slide_number = section.settings.slide_number %}
+{% endif %}
+{% for block in section.blocks %}
+<li class="carouselSlider
+{% case section.settings.slide_number %}
+{% when 3 %} three
+{% when 4 %} four
+{% when 5 %} five
+{% when 6 %} four
+{% when 7 %} four
+{% endcase %}"
+id="slide-{% increment %}">
+<div class="cardWrapper">
+{% assign img_url = block.settings.card_image %}
+<div class="cardImageWrapper">
+<img class="cardImage"
+src="{{img_url | img_url: master}}"
+srcset="{% case img_url.width %}
+{% when >= 375 %}{{ img_url | img_url: '375x' }}375w,
+{% when >= 750 %}{{ img_url | img_url: '750x' }}750w,
+{% when >= 1100 %}{{ img_url | img_url: '1100x' }}1100w,
+{% when >= 1500 %}{{ img_url | img_url: '1500x' }}1500w,
+{% when >= 1780 %}{{ img_url | img_url: '1780x' }}1780w,
+{% when >= 2000 %}{{ img_url | img_url: '2000x' }}2000w,
+{% when >= 3000 %}{{ img_url | img_url: '3000x' }} 3000w,
+{% when >= 3840 %}{{ img_url | img_url: '3840x' }}3840w,
+{% else %} {{ img_url | img_url: 'master' }}w,
+{% endcase %}"
+loading="lazy"
+alt="{{ img_url.alt | escape }}">
+</div>
+<h2 class="cardTitle">{{block.settings.title}}</h2>
+<div class="cardDescription">{{block.settings.card_description}}</div>
+</div>
+</li>
+{% endfor %}
+{% endcase %}
+</ul>
+</div>
+<div class="controlContainer">
+<div class="btnContainer">
+<button type="button" class="controlWrapper" id="prevSlide">
+<span class="controlBtn prevBtn" ></span>
+</button>
+<ul class="slideDotContainer">
+{% case section.settings.counter_type %}
+{% when 'dots' %}
+
+{% if section.settings.type == 'card' %}
+{% for block in section.blocks %}
+<li class="slideDots {% if forloop.first %}activeDot{% endif %}" data-dot-id="{{forloop.index0}}" onclick="showDot(this.dataset.dotId)">
+</li>
+{% endfor %}
+{% endif %}
+{% if section.settings.type == 'product' %}
+{% for product in section.settings.collection.products limit: section.settings.products_count %}
+<li class="slideDots {% if forloop.first %}activeDot{% endif %}" data-dot-id="{{forloop.index0}}" onclick="showDot(this.dataset.dotId)">
+</li>
+{% endfor %}
+{% endif %}
+
+{% when 'number' %}
+<span class="activeNumber">{{forloop.index}}</span> / <span>{% if section.settings.type == 'product' %} {{products_to_display}}{% endif %}
+{% if section.settings.type == 'card' %}{{section.blocks.size}}{% endif %}</span>
+{% endcase %}
+
+</ul>
+<button type="button" class="controlWrapper" id="nextSlide" >
+<span class="controlBtn nextBtn"></span>
+</button>
+</div>
+{% if section.settings.autoplay == true %}
+<button type="button" class="pauseContainer" id="autoplaySlide" onclick = "pauseFx()">
+<span class="pauseBtn"></span>
+<span class="playBtn"> </span>
+</button>
+{% endif %}
+</div>
+</div>
+
+{% schema %}
+{
+"name": "Universal Carousel",
+"settings": [
+{
+"type": "text",
+"id": "title",
+"label": "carousel name"
+},
+{
+"type": "select",
+"id": "type",
+"default": "product",
+"label": "type of item",
+"options": [
+{
+"value": "product",
+"label": "product"
+},
+{
+"value": "card",
+"label": "card"
+}
+]
+},
+{
+"type": "collection",
+"id": "collection",
+"label": "Collection"
+},
+{
+"type": "checkbox",
+"id": "autoplay",
+"default": false,
+"label": "Autoplay"
+},
+{
+"type": "checkbox",
+"id": "view_all",
+"default": false,
+"label": "Show view all button (only available in product type)"
+},
+{
+"type": "checkbox",
+"id": "infinite",
+"default": false,
+"label": "Infinite Scroll"
+},
+{
+"type": "range",
+"id": "interval",
+"label": "interval",
+"max": 15,
+"min": 1,
+"step": 1,
+"unit": "s",
+"default": 3
+},
+{
+"type": "range",
+"id": "slide_number",
+"min": 3,
+"max": 7,
+"label": "Number of slides to display",
+"default": 4
+},
+{
+"type": "range",
+"id": "products_count",
+"min": 4,
+"max": 100,
+"label": "Number of products to display",
+"default": 4
+},
+{
+"type": "select",
+"id": "counter_type",
+"default": "number",
+"label": "type of counter",
+"options": [
+{
+"value": "dots",
+"label": "dots"
+},
+{
+"value": "number",
+"label": "number"
+}
+]
+}
+],
+"blocks": [
+{
+"type": "card",
+"name": "card",
+"settings": [
+{
+"type": "image_picker",
+"id": "card_image",
+"label": "card image"
+},
+{
+"type": "text",
+"id": "title",
+"label": "title"
+},
+{
+"type": "richtext",
+"id": "card_description",
+"label": "description",
+"default": "<p>Write your drescription here</p>"
+}
+]
+}
+],
+"presets": [
+{
+"name": "Universal Carousel"
+}
+]
+}
+{% endschema %}
