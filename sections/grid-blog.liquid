@@ -1,12 +1,63 @@
-{% schema %}
-  {
-    "name": "Section name",
-    "settings": []
-  }
-{% endschema %}
+<form method="get" action="/search">
+    <input type="search" name="q" value="" placeholder="Søg i opskrifter..." aria-label="Søg i opskrifter">
+</form>
 
-{% stylesheet %}
-{% endstylesheet %}
+{% paginate blog.articles by 6 %}
 
-{% javascript %}
-{% endjavascript %}
+{% include 'breadcrumb' %}
+
+<div class="grid">
+  
+  <div class="grid-item large--four-fifths" id=blog-grid">
+
+        {% if current_tags %}
+          <h1>{{ blog.title | link_to: blog.url }} &mdash; {{ current_tags.first }}</h1>
+        {% else %}
+          <h1>{{ blog.title }}</h1>
+        {% endif %}
+
+        {% for article in blog.articles %}
+        <div class="post-grid large--one-quarter">
+          <h2><a href="{{ article.url }}">{{ article.title }}</a></h2>
+
+          <div class="rte">
+          {% if article.image %}
+            {% assign image_alt = article.title | escape %}
+            <p>
+            {{ article | img_url: '1024x1024' | img_tag: image_alt, 'article__image' | link_to: article.url }}
+            </p>
+          {% endif %}
+            {% if article.excerpt.size > 0 %}
+              {{ article.excerpt }}
+            {% else %}
+              <p>{{ article.content | strip_html | truncatewords: 100 }}</p>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+            
+        {% if paginate.pages > 1 %}
+        <hr>
+        <div class="text-center">
+          {% include 'pagination-custom' %}
+        </div>
+        {% endif %}
+
+  </div>
+
+  <aside class="sidebar grid-item large--one-fifth grid-border--left">
+    {% include 'blog-sidebar' %}
+  </aside>
+</div>
+
+{% endpaginate %}
+
+#Custom -- styles #
+
+@media screen and (min-width:767px){
+    .post-grid{
+        float: left;
+        margin-right: 60px;
+        min-height: 450px;
+    }
+}
